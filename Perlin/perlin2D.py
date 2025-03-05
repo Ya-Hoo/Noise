@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors
 import random, math
 
 """
@@ -9,7 +10,7 @@ Assumptions:
 """
 
 np.random.seed(30042603)  # initialise seed for random number
-random.seed(30042603)
+random.seed(696969)
     
 def interpolant(t):
     return 6 * t**5 - 15 * t**4 + 10 * t**3
@@ -63,9 +64,40 @@ def generate_perlin_noise_2d(shape, res):
     return noise
 
 SHAPE = (1024, 1024) # width * height
-RES = (128,128)
+RES = (2,2)
+
+# custom color map
+cvals = [-1, 1]
+
+# sunset?
+colors = [ 
+    "#393e75", "#644b80", "#8e588a", "#b5698e", "#dc7a91", "#ed8990", "#fe978e", "#fea98e", "#febb8e", "#ffd99e"
+]
+
+# fantasy
+colors = [ 
+    "#7c8d4c", "#b5ba61", "#e5d9c2", "#b6e3db"
+][::-1]
+
+# blue
+colors = [
+    "#f2f8e9", "#c5e2bf", "#95cac4", "#68a1c6", "#3b68a7"
+]
+
+# green
+colors = [
+    "#fefed1", "#cae3a1", "#8fc281", "#5d9f5c", "#33653c"
+]
+
+# idk
+colors = [
+    "#4e7bb1", "#b9d8e7", "#fefec6", "#ebb16e", "#bd3529"
+]
+norm = plt.Normalize(-1,1)
+tuples = list(zip(map(norm,cvals), colors))
+cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", colors=colors)
 
 terrain = generate_perlin_noise_2d(SHAPE, RES)
-plot = plt.imshow(terrain, interpolation=None)
+plot = plt.imshow(terrain, interpolation=None, cmap="viridis")
 plt.colorbar()
 plt.show()
