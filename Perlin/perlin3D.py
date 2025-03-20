@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random, math
 
+random.seed(30042603)
+np.random.seed(30042603)
+
 def interpolant(t):
     return 6 * t**5 - 15 * t**4 + 10 * t**3
 
@@ -56,11 +59,22 @@ def generate_perlin_noise_2d(shape, res):
 
     return noise
 
-SHAPE = (64, 64) # width * height
-RES = (2,2)
+SHAPE = (1024, 1024) # width * height
+RES = (1,1)
+FREQUENCY = 1
+AMPLITUDE = 1
+LACUNARITY = 2
+PERSISTENCE = 0.5
+OCTAVES_CNT = 6
 
-# Load and format data
-z = np.array(generate_perlin_noise_2d(SHAPE, RES))
+terrain = np.zeros(shape=SHAPE)
+
+# OCTAVES
+for i in range(OCTAVES_CNT):    
+    terrain += AMPLITUDE * np.array(generate_perlin_noise_2d(SHAPE, (RES[0]*FREQUENCY,RES[1]*FREQUENCY)))
+    FREQUENCY *= LACUNARITY
+    AMPLITUDE *= PERSISTENCE
+
 nrows, ncols = SHAPE
 x = np.linspace(0, SHAPE[0], ncols)
 y = np.linspace(0, SHAPE[1], nrows)
@@ -69,8 +83,8 @@ x, y = np.meshgrid(x, y)
 # Set up plot
 fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
 ls = LightSource(270, 45)
-rgb = ls.shade(z, cmap=cm.gist_earth, vert_exag=1, blend_mode="soft")
-surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, facecolors=rgb,
+rgb = ls.shade(terrain, cmap=cm.gist_earth, vert_exag=0.25, blend_mode="soft")
+surf = ax.plot_surface(x, y, terrain, rstride=1, cstride=1, facecolors=rgb,
                        linewidth=0, antialiased=False, shade=False)
 
 plt.show()
