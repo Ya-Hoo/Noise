@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors
 from matplotlib import cm
 import random, math
 
@@ -85,12 +84,12 @@ colors = [
 ]
 
 SHAPE = (1024, 1024) # width * height
-RES = (2,2)
+RES = (512,512)
 FREQUENCY = 1
 AMPLITUDE = 1
 LACUNARITY = 2
 PERSISTENCE = 0.5
-OCTAVES_CNT = 6
+OCTAVES_CNT = 1
 
 terrain = np.zeros(shape=SHAPE)
 
