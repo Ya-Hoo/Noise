@@ -51,7 +51,7 @@ terrain = np.zeros(shape=(N, N))
 for i in range(OCTAVES_CNT):  
     for y in range(N):
         for x in range(N):
-            terrain[y][x] = Value(x/N * FREQUENCY, y/N * FREQUENCY)  
+            terrain[y][x] += Value(x/N * FREQUENCY, y/N * FREQUENCY)  
     FREQUENCY *= LACUNARITY
     AMPLITUDE *= PERSISTENCE
 
