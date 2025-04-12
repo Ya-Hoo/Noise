@@ -1,0 +1,8 @@
+{
+    "N": 256,
+    "FREQUENCY": 4,
+    "AMPLITUDE": 1.5,
+    "LACUNARITY": 2,
+    "PERSISTENCE": 0.5,
+    "OCTAVES_CNT": 1
+}
