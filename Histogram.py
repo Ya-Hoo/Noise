@@ -1,19 +1,29 @@
 import matplotlib.pyplot as plt
 import math
-from Perlin.perlin2D import terrain, N
+from Noise.perlin import N
+
+from Noise.perlin import terrain as PerlinTerrain
+from Noise.value import terrain as ValueTerrain
+
 
 # HISTOGRAM
-heights = [terrain[y][x] for x in range(N) for y in range(N)]
-n_bins = math.ceil(2* (len(heights) ** (1/3)))
+n_bins = math.ceil(2* (N ** (2/3)))
 
 # Create the histogram
-plt.figure(figsize=(10, 6))
-plt.hist(heights, bins=n_bins, edgecolor='black', alpha=0.7, color='cornflowerblue')
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+ax1.hist(PerlinTerrain.flatten(), bins=n_bins, density=True, edgecolor='black', alpha=0.2, label='Perlin')
+ax2.hist(ValueTerrain.flatten(), bins=n_bins, density=True, edgecolor='black', alpha=0.2, label='Value')
 
 # Add labels and title
-plt.xlabel('Elevation Value')
-plt.ylabel('Frequency')
+ax1.set_xlabel('Normalized Elevation Value [0,1]')
+ax1.set_ylabel('Probability Density')
+ax2.set_xlabel('Normalized Elevation Value [0,1]')
+ax2.set_ylabel('Probability Density')
 
 # Show the plot
-plt.grid(axis='y', alpha=0.5)
+ax1.grid(axis='y', alpha=0.5)
+ax1.legend()
+ax2.grid(axis='y', alpha=0.5)
+ax2.legend()
 plt.show()

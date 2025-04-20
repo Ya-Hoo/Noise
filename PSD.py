@@ -1,72 +1,50 @@
 import numpy as np
-from Perlin.perlin2D import terrain, N
+import matplotlib.pyplot as plt
+from Noise.perlin import terrain as PerlinTerrain
+from Noise.value import terrain as ValueTerrain
 
-# POWER SPECTRAL DENSITY
-def compute_psd_2d(matrix):
-    # Remove DC component
-    zero_mean = matrix - np.mean(matrix)
-    
-    # Compute 2D FFT
-    dft = np.fft.fft2(zero_mean)
-    
-    # Compute PSD (|F(k,l)|² / N²) and convert to dB
-    psd = 10 * np.log10((np.abs(dft)**2) / (matrix.shape[0] * matrix.shape[1]) + 1e-20)
-    
-    # Center the spectrum
-    psd_shifted = np.fft.fftshift(psd)
-    
-    return psd_shifted
+# Signal 1: Random noise + horizontal stripes
+x1 = PerlinTerrain
 
-def plot_psd(psd):
-    plt.figure(figsize=(10, 8))
-    plt.imshow(psd, cmap='jet', 
-               vmin=np.max([-60, np.min(psd)]),  # Set reasonable dB floor
-               vmax=np.max(psd))
-    plt.colorbar(label='Power (dB)')
-    plt.axis('off')
-    plt.show()
+# Signal 2: Random noise + checkerboard pattern
+x2 = ValueTerrain
 
-matrix = terrain
-size = 1024
-# Compute and plot PSD
-psd = compute_psd_2d(matrix)
-#plot_psd(psd)
+# Compute 2D PSD for both signals
+def compute_2d_psd(signal):
+    X = np.fft.fft2(signal)  # 2D FFT
+    Sxx = np.abs(X)**2  # Power spectrum
+    Sxx = np.fft.fftshift(Sxx)  # Shift zero-frequency to center
+    return Sxx
 
-def analyze_psd(psd):
-    # Convert back to linear scale
-    linear_psd = 10**(psd/10)  
-    
-    # Create frequency axes (normalized 0 to 0.5)
-    freq = np.fft.fftshift(np.fft.fftfreq(1024))  
-    
-    # Radial profile
-    radius = np.sqrt(np.add.outer(freq**2, freq**2))
-    radial_profile = [linear_psd[(radius >= r-0.01) & (radius < r+0.01)].mean() 
-                     for r in np.linspace(0, 0.5, 50)]
-    
-    plt.figure(figsize=(10,4))
-    plt.plot(np.linspace(0, 0.5, 50), radial_profile)
-    plt.xlabel('Spatial Frequency (cycles/pixel)')
-    plt.ylabel('Power')
-    plt.title('Radial Power Distribution')
-    plt.grid()
-    
-    # Directional analysis
-    directions = []
-    for angle in range(0, 180, 10):
-        mask = np.zeros_like(psd)
-        cv2.line(mask, (512,512), 
-                (int(512+500*np.cos(np.radians(angle))), 
-                 int(512+500*np.sin(np.radians(angle)))),
-                1, thickness=3)
-        directions.append(linear_psd[mask==1].mean())
-    
-    plt.figure(figsize=(10,4))
-    plt.plot(range(0, 180, 10), directions)
-    plt.xlabel('Direction (degrees)')
-    plt.ylabel('Power')
-    plt.title('Directional Power Distribution')
-    plt.grid()
-    
-analyze_psd(psd)
+Sxx1 = compute_2d_psd(x1)
+Sxx2 = compute_2d_psd(x2)
+
+# Convert to logarithmic scale and find global min/max for consistent color scaling
+log_Sxx1 = np.log10(Sxx1)
+log_Sxx2 = np.log10(Sxx2)
+vmin = min(log_Sxx1.min(), log_Sxx2.min())  # Global minimum
+vmax = max(log_Sxx1.max(), log_Sxx2.max())  # Global maximum
+
+# Create a figure with two subplots and a shared color bar
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+# Plot Signal 1 PSD
+im1 = ax1.imshow(log_Sxx1, cmap='jet', vmin=vmin, vmax=vmax)
+ax1.set_title('PSD of Perlin noise')
+ax1.set_xlabel('Spatial Frequency (u)')
+ax1.set_ylabel('Spatial Frequency (v)')
+
+# Plot Signal 2 PSD
+im2 = ax2.imshow(log_Sxx2, cmap='jet', vmin=vmin, vmax=vmax)
+ax2.set_title('PSD of Value noise')
+ax2.set_xlabel('Spatial Frequency (u)')
+ax2.set_ylabel('Spatial Frequency (v)')
+
+# Adjust subplots to make room for the color bar
+plt.subplots_adjust(right=0.85)  # Leave 15% space on the right
+
+# Add a single color bar on the right side of the plots
+cbar_ax = fig.add_axes([0.88, 0.15, 0.03, 0.7])  # [left, bottom, width, height]
+fig.colorbar(im2, cax=cbar_ax, label='Log Power (dB)')
+
 plt.show()

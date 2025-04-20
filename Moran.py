@@ -1,10 +1,10 @@
 # MORAN'S I
 from scipy import sparse
 from scipy.spatial.distance import cdist
-from scipy.stats import norm
 import numpy as np
-from Perlin.perlin2D import terrain as PerlinTerrain
-from Value.value2D import terrain as ValueTerrain
+from Noise.perlin import terrain as PerlinTerrain
+from Noise.value import terrain as ValueTerrain
+from geoData.GMTED import everest_normalized, denali_normalized, matterhorn_normalized
 
 def Moran(matrix, radius=16, block_size=1500):
     """
@@ -14,10 +14,9 @@ def Moran(matrix, radius=16, block_size=1500):
         matrix: 2D numpy array (terrain data)
         radius: Neighborhood cutoff in pixels
         block_size: Number of points to process at once
-        downsample: Optional factor to reduce matrix size (e.g., 2 for half-size)
         
     Returns:
-        Moran's I, Expected I, z-score, p-value
+        Moran's I, Expected I
     """
     
     # Flatten matrix and get basic stats
@@ -25,12 +24,6 @@ def Moran(matrix, radius=16, block_size=1500):
     y_mean = np.mean(y)
     deviations = y - y_mean
     n = len(y)
-    
-    # Expected value under randomness
-    expected_i = -1 / (n - 1)
-    
-    if np.var(y) == 0:
-        return 1.0, expected_i
     
     # Generate coordinates
     rows, cols = matrix.shape
@@ -73,13 +66,12 @@ def Moran(matrix, radius=16, block_size=1500):
     denominator = (deviations ** 2).sum()
     morans_i = (n / s0) * (numerator / denominator)
 
-    return morans_i, expected_i
+    return morans_i
 
     
 # Compute Moran's I
-Ip, Ep = Moran(PerlinTerrain)
-Iv, Ev = Moran(ValueTerrain)
+Ip = Moran(PerlinTerrain)
+Iv = Moran(ValueTerrain)
 
 print(f"Moran's I: {Ip}")
 print(f"Moran's I: {Iv}")
-print(f"Expected I: {Ep}")
